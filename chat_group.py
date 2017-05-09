@@ -1,5 +1,6 @@
 S_ALONE = 0
 S_TALKING = 1
+S_GAMING = 2
 
 #==============================================================================
 # Group class:
@@ -20,6 +21,7 @@ class Group:
     def __init__(self):
         self.members = {}
         self.chat_grps = {}
+        self.game_grps = {}
         self.grp_ever = 0
         
     def join(self, name):
@@ -77,6 +79,12 @@ class Group:
                 self.members[peer] = S_ALONE
                 del self.chat_grps[group_key]
         return
+        
+    def game_connect(self, me, peer):
+        pass
+    
+    def game_disconnect(self, me):
+        pass
         
     def list_all(self):
         # a simple minded implementation

@@ -30,7 +30,7 @@ class Game:
         else:
             self.player1.result = 'Draw'
             self.player2.result = 'Draw'
-        
+    
     def calculate(self):
         if self.player1.result == 'Lose':
             self.player1.chip -= self.player1.bid
@@ -40,9 +40,9 @@ class Game:
             self.player1.chip += self.player2.bid
         self.player1.initbid()
         self.player2.initbid()
-
-    def __str__(self):
-        pass
+        
+    def show(self):
+        print(self.player1.get_chip(), self.player2.get_chip())
     
 if __name__ == "__main__":
     game = Game("a", "b")

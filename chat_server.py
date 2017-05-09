@@ -163,7 +163,7 @@ class Server:
                     to_sock = self.logged_name2sock[g]
                     mysend(to_sock, M_DISCONNECT)
 #==============================================================================
-# Gaming: Indian Cards
+# Gaming: Indian Cards; implement
 #==============================================================================
             elif code == M_GAME:
                 from_name = self.logged_sock2name[from_sock]

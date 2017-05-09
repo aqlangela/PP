@@ -60,17 +60,6 @@ class Info():
         if self.card == 10:
             self.bid += 10
         self.result = 'Lose'
-        
-    def menu(self):
-        #
-        pass
-    
-    def __str__(self):
-        if self.result == 'Win':
-            return "%s: chip-%s, +%s" % (self.name, self.chip, self.rivalbid)
-        else:
-            return "%s: chip-%s, -%s" % (self.name, self.chip, self.rivalbid)
-        pass
 
 if __name__ == "__main__":
     player1 = Info("A")
