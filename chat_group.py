@@ -23,14 +23,24 @@ class Group:
         self.chat_grps = {}
         self.game_grps = {}
         self.grp_ever = 0
+        self.game_grp_ever = 0
         
     def join(self, name):
         self.members[name] = S_ALONE
         return
         
     def is_member(self, name):
-        return name in self.members.keys()
-            
+        if name in self.members.keys():
+            if self.members[name] == 0 or self.members[name] == 1:
+                return True
+        return False
+    
+    def is_alone(self, name):
+        if name in self.members.keys():
+            if self.members[name] == 0:
+                return True
+        return False
+        
     def leave(self, name):
         self.disconnect(name)
         del self.members[name]
@@ -41,6 +51,16 @@ class Group:
         group_key = 0
         for k in self.chat_grps.keys():
             if name in self.chat_grps[k]:
+                found = True
+                group_key = k
+                break
+        return found, group_key
+        
+    def find_game_group(self, name):
+        found = False
+        group_key = 0
+        for k in self.game_grps.keys():
+            if name in self.game_grps[k]:
                 found = True
                 group_key = k
                 break
@@ -81,11 +101,28 @@ class Group:
         return
         
     def game_connect(self, me, peer):
-        pass
+        #if peer is in a group, join it
+        print(peer, "is already to connect!")
+        self.game_grp_ever += 1
+        group_key = self.game_grp_ever
+        self.game_grps[group_key] = []
+        self.game_grps[group_key].append(me)
+        self.game_grps[group_key].append(peer)
+        self.members[me] = S_GAMING
+        self.members[peer] = S_GAMING     
+        print(self.list_me(me))
     
     def game_disconnect(self, me):
-        pass
-        
+        in_group, group_key = self.find_game_group(me)
+        if in_group == True:
+            self.game_grps[group_key].remove(me)
+            self.members[me] = S_ALONE
+            # peer may be the only one left as well...
+            if len(self.game_grps[group_key]) == 1:
+                peer = self.game_grps[group_key].pop()
+                self.members[peer] = S_ALONE
+                del self.game_grps[group_key]
+
     def list_all(self):
         # a simple minded implementation
         full_list = "Users: ------------" + "\n"
@@ -100,8 +137,13 @@ class Group:
             my_list = []
             my_list.append(me)
             in_group, group_key = self.find_group(me)
+            in_game_group, game_group_key = self.find_game_group(me)
             if in_group == True:
                 for member in self.chat_grps[group_key]:
+                    if member != me:
+                        my_list.append(member)
+            elif in_game_group == True:
+                for member in self.game_grps[group_key]:
                     if member != me:
                         my_list.append(member)
         return my_list

@@ -26,6 +26,9 @@ class Server:
         self.sonnet_f = open('AllSonnets.txt.idx', 'rb')
         self.sonnet = pkl.load(self.sonnet_f)
         self.sonnet_f.close()
+        # game
+        self.player1 = ""
+        self.player2 = ""
         
     def new_client(self, sock):
         #add to all sockets and to new clients
@@ -104,6 +107,17 @@ class Server:
                 else:
                     msg = M_CONNECT + 'no_user'
                 mysend(from_sock, msg)
+                
+            if code == M_GCONNECT:
+                to_name = msg[1:]
+                from_name = self.logged_sock2name[from_sock]
+                if to_name == from_name:
+                    msg = M_GCONNECT + 'hey you'
+                elif self.group.is_alone(to_name):
+                    to_sock = self.logged_name2sock[to_name]
+                    self.group.game_connect(from_name, to_name)
+                    
+                    
 #==============================================================================
 # handle message exchange   
 #==============================================================================
@@ -166,8 +180,13 @@ class Server:
 # Gaming: Indian Cards; implement
 #==============================================================================
             elif code == M_GAME:
-                from_name = self.logged_sock2name[from_sock]
-                
+                from_name = self.logged_sock2name[from_sock][1:]
+                msg = msg.strip().split()
+                func, num = msg[0], msg[1]
+                if func == "bid":
+                    
+                    
+                    
 #==============================================================================
 #the "from" guy really, really has had enough
 #==============================================================================

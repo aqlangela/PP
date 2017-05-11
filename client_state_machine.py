@@ -90,7 +90,10 @@ class ClientSM:
                 elif my_msg[0] == 'g':
                     peer = my_msg[1:]
                     peer = peer.strip()
-                    
+                    if self.connect_to(peer) == True:
+                        self.state = S_GAMING
+                        self.out_msg += 'Waiting for ' + peer + '. Chat away!\n\n'
+                        
                         
                 elif my_msg[0] == '?':
                     term = my_msg[1:].strip()
