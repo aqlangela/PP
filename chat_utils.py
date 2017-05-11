@@ -11,6 +11,7 @@ M_SEARCH    = '6'
 M_LIST      = '7'
 M_POEM      = '8'
 M_TIME      = '9'
+M_GAME      = '10'
 
 #CHAT_IP = ''
 CHAT_IP = socket.gethostname()
@@ -21,6 +22,7 @@ menu = "\n++++ Choose one of the following commands\n \
         time: calendar time in the system\n \
         who: to find out who else are there\n \
         c _peer_: to connect to the _peer_ and chat\n \
+        g _peer_: to connect to the _peer_ and play Indian Cards\n \
         ? _term_: to search your chat logs where _term_ appears\n \
         p _#_: to get number <#> sonnet\n \
         q: to leave the chat system\n\n"
@@ -29,6 +31,7 @@ S_OFFLINE   = 0
 S_CONNECTED = 1
 S_LOGGEDIN  = 2
 S_CHATTING  = 3
+S_GAMING    = 4
 
 SIZE_SPEC = 5
 
@@ -44,6 +47,8 @@ def print_state(state):
         print('Logged in')
     elif state == S_CHATTING:
         print('Chatting')
+    elif state == S_GAMING:
+        print('Gaming')
     else:
         print('Error: wrong state')
     
