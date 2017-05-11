@@ -43,8 +43,28 @@ class ClientSM:
         return(False)
         
     def game_with(self, peer):
+        msg = M_GCONNECT + peer
+        mysend(self.s, msg)
+        response = myrecv(self.s)
+        if response == (M_GCONNECT +'ok'):
+            self.peer = peer
+            self.out_msg += 'You are connected with '+ self.peer + '\n'
+            return (True)
+        elif response == (M_GCONNECT + 'busy'):
+            self.out_msg += 'User is busy. Please try again later\n'
+        elif response == (M_GCONNECT + 'hey you'):
+            self.out_msg += 'Cannot play with yourself (moron)\n'
+        else:
+            self.out_msg += 'User is not online, try again later\n'
+        return(False)
+    
+    #???
+    def quitgame(self):
+        msg = M_QUITGAME
+        mysend(self.s, msg)
+        self.out_msg += 'You and ' + self.peer + '\n'
+        self.peer = ''
         
-
     def disconnect(self):
         msg = M_DISCONNECT
         mysend(self.s, msg)
@@ -90,10 +110,12 @@ class ClientSM:
                 elif my_msg[0] == 'g':
                     peer = my_msg[1:]
                     peer = peer.strip()
-                    if self.connect_to(peer) == True:
+                    if self.game_with(peer) == True:
                         self.state = S_GAMING
-                        self.out_msg += 'Waiting for ' + peer + '. Chat away!\n\n'
-                        
+                        self.out_msg += 'Enjoy playing with ' + peer + '!\n\n'
+                        self.out_msg += '-----------------------------------\n'
+                    else:
+                        self.out_msg += 'Connection unsuccessful\n'
                         
                 elif my_msg[0] == '?':
                     term = my_msg[1:].strip()
@@ -149,6 +171,14 @@ class ClientSM:
             # Display the menu again
             if self.state == S_LOGGEDIN:
                 self.out_msg += menu
+#==============================================================================
+# S_GAMING
+#==============================================================================
+        elif self.state == S_GAMING:
+            if len(my_msg) > 0:
+                mysend(self.s, M_EXCHANGE + "[" + self.me + "] " + my_msg)
+                instruction = myrecv(self.s)[1:]
+                
 #==============================================================================
 # invalid state                       
 #==============================================================================

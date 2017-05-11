@@ -26,6 +26,10 @@ menu = "\n++++ Choose one of the following commands\n \
         ? _term_: to search your chat logs where _term_ appears\n \
         p _#_: to get number <#> sonnet\n \
         q: to leave the chat system\n\n"
+        
+game_menu = "Please choose one of the orders\n \
+             _bid_ x: the player bid x in turn\n \
+             _raise_ x: raise "
 
 S_OFFLINE   = 0
 S_CONNECTED = 1

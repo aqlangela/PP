@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Tue May  9 12:35:00 2017
-
-@author: angela
-"""
 
 import random
 import playerinfo as info
@@ -15,12 +10,21 @@ class Game:
         self.player1 = info.Info(player1)
         self.player2 = info.Info(player2)
         self.stack = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
+        self.record = {self.player1:[(0, 0, 0) for i in range(10)], \
+                                     self.player2:[(0, 0, 0) for i in range(10)]}
+
     
     def deal(self):
         self.player1.card = random.choice(self.stack)
         self.stack.remove(self.player1.card)
         self.player2.card = random.choice(self.stack)
         self.stack.remove(self.player2.card)
+        
+    def show(self, to_name, from_name):
+        pass
+        
+    def reveal(self):
+        return 
         
     def compare(self):
         if self.player1.card > self.player2.card:
@@ -30,7 +34,7 @@ class Game:
         else:
             self.player1.result = 'Draw'
             self.player2.result = 'Draw'
-    
+    #是直接在server还是在这里？
     def calculate(self):
         if self.player1.result == 'Lose':
             self.player1.chip -= self.player1.bid

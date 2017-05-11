@@ -7,6 +7,7 @@ import indexer
 import pickle as pkl
 from chat_utils import *
 import chat_group as grp
+import game as gm
 
 class Server:
     def __init__(self):
@@ -29,6 +30,7 @@ class Server:
         # game
         self.player1 = ""
         self.player2 = ""
+        self.game = gm.Game(self.player1, self.player2)
         
     def new_client(self, sock):
         #add to all sockets and to new clients
@@ -116,8 +118,15 @@ class Server:
                 elif self.group.is_alone(to_name):
                     to_sock = self.logged_name2sock[to_name]
                     self.group.game_connect(from_name, to_name)
-                    
-                    
+                    msg = M_GCONNECT + 'ok'
+                    self.player1 = from_name
+                    self.player2 = to_name
+                    self.game = gm.Game(self.player1, self.player2)
+                    to_sock = self.logged_name2sock[to_name]
+                    mysend(to_sock, M_GCONNECT + from_name)
+                else:
+                    msg = M_GCONNECT + 'no_user'
+                mysend(from_sock, msg)   
 #==============================================================================
 # handle message exchange   
 #==============================================================================
@@ -185,7 +194,7 @@ class Server:
                 func, num = msg[0], msg[1]
                 if func == "bid":
                     
-                    
+                elif func
                     
 #==============================================================================
 #the "from" guy really, really has had enough
