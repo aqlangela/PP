@@ -11,10 +11,12 @@ M_SEARCH    = '6'
 M_LIST      = '7'
 M_POEM      = '8'
 M_TIME      = '9'
-M_GAME      = '10'
+M_GCONNECT  = '10'
+M_GAME      = '11'
+M_QUITGAME = '12'
 
-#CHAT_IP = ''
-CHAT_IP = socket.gethostname()
+CHAT_IP = ''
+#CHAT_IP = socket.gethostname()
 CHAT_PORT = 1112
 SERVER = (CHAT_IP, CHAT_PORT)
 
@@ -28,8 +30,11 @@ menu = "\n++++ Choose one of the following commands\n \
         q: to leave the chat system\n\n"
         
 game_menu = "Please choose one of the orders\n \
-             _bid_ x: the player bid x in turn\n \
-             _raise_ x: raise "
+             bid _x_: the player bid x in turn\n \
+             call _x_: \
+             raise _x_: raise \
+             fold \
+             "
 
 S_OFFLINE   = 0
 S_CONNECTED = 1
@@ -37,7 +42,7 @@ S_LOGGEDIN  = 2
 S_CHATTING  = 3
 S_GAMING    = 4
 
-SIZE_SPEC = 5
+SIZE_SPEC = 7
 
 CHAT_WAIT = 0.2
 

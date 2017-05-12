@@ -40,7 +40,19 @@ class Group:
             if self.members[name] == 0:
                 return True
         return False
-        
+
+    def is_chatting(self, name):
+        if name in self.members.keys():
+            if self.members[name] == 1:
+                return True
+        return False
+    
+    def is_gaming(self, name):
+        if name in self.members.keys():
+            if self.members[name] == 2:
+                return True
+        return False
+    
     def leave(self, name):
         self.disconnect(name)
         del self.members[name]
@@ -127,8 +139,10 @@ class Group:
         # a simple minded implementation
         full_list = "Users: ------------" + "\n"
         full_list += str(self.members) + "\n"
-        full_list += "Groups: -----------" + "\n"
+        full_list += "Chat Groups: -----------" + "\n"
         full_list += str(self.chat_grps) + "\n"
+        full_list += "Game Groups: -----------" + "\n"
+        full_list += str(self.game_grps) + "\n"
         return full_list
         
     def list_me(self, me):
@@ -143,18 +157,21 @@ class Group:
                     if member != me:
                         my_list.append(member)
             elif in_game_group == True:
-                for member in self.game_grps[group_key]:
+                for member in self.game_grps[game_group_key]:
                     if member != me:
                         my_list.append(member)
         return my_list
 
-def main():
+'''def main():
     g = Group()
     g.join('a')
     g.join('b')
-    g.list_all()
+    g.join('c')
+    g.join('d')
+    print(g.list_all())
     g.connect('a', 'b')
-    g.list_all()
+    g.game_connect('c', 'd')
+    print(g.list_all())
     print(g.list_me('b'))
     
-main()
+main()'''

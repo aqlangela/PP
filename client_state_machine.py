@@ -13,6 +13,8 @@ class ClientSM:
         self.me = ''
         self.out_msg = ''
         self.s = s
+        self.lastrecv = ''
+        self.speak = True
 
     def set_state(self, state):
         self.state = state
@@ -38,6 +40,8 @@ class ClientSM:
             self.out_msg += 'User is busy. Please try again later\n'
         elif response == (M_CONNECT + 'hey you'):
             self.out_msg += 'Cannot talk to yourself (sick)\n'
+        elif response == (M_CONNECT + 'gaming'):
+            self.out_msg += 'User is playing. Please try again later\n'
         else:
             self.out_msg += 'User is not online, try again later\n'
         return(False)
@@ -54,6 +58,8 @@ class ClientSM:
             self.out_msg += 'User is busy. Please try again later\n'
         elif response == (M_GCONNECT + 'hey you'):
             self.out_msg += 'Cannot play with yourself (moron)\n'
+        elif response == (M_GCONNECT + 'chatting'):
+            self.out_msg += 'User is chatting. Please try again later\n'
         else:
             self.out_msg += 'User is not online, try again later\n'
         return(False)
@@ -62,7 +68,7 @@ class ClientSM:
     def quitgame(self):
         msg = M_QUITGAME
         mysend(self.s, msg)
-        self.out_msg += 'You and ' + self.peer + '\n'
+        self.out_msg += 'You and ' + self.peer + 'quit the game\n'
         self.peer = ''
         
     def disconnect(self):
@@ -112,8 +118,13 @@ class ClientSM:
                     peer = peer.strip()
                     if self.game_with(peer) == True:
                         self.state = S_GAMING
-                        self.out_msg += 'Enjoy playing with ' + peer + '!\n\n'
+                        self.out_msg += 'Ger ready to play with ' + peer + '!\n\n'
                         self.out_msg += '-----------------------------------\n'
+                        self.out_msg += 'Are you ready?(y/n/rec/...)\n'
+                        self.out_msg += 'y: Simply start without equipment\n'
+                        self.out_msg += 'n: I do not wanna play any more\n'
+                        self.out_msg += 'rec: Start with card record machine'
+                        self.lastrecv = 'Are you ready?'
                     else:
                         self.out_msg += 'Connection unsuccessful\n'
                         
@@ -175,10 +186,73 @@ class ClientSM:
 # S_GAMING
 #==============================================================================
         elif self.state == S_GAMING:
-            if len(my_msg) > 0:
-                mysend(self.s, M_EXCHANGE + "[" + self.me + "] " + my_msg)
-                instruction = myrecv(self.s)[1:]
+            if len(my_msg) > 0 and self.speak == True:
+                if self.lastrecv == 'Are you ready?' or self.lastrecv == 'Play again?(y/n/rec/...)':
+                    if my_msg == 'n':
+                        self.quitgame()
+                        self.state = S_LOGGEDIN
+                        self.peer = ''
+                    elif my_msg == 'y' or my_msg == 'rec' or my_msg == 'cheat':
+                        mysend(self.s, M_GAME + my_msg)
+                        self.speak = False
+                        self.out_msg += 'You are ready.'
+                    else:
+                        self.out_msg += 'Invalid reply. Try again.'
+                elif self.lastrecv == 'Bid or Fold?':
+                    if my_msg[0:4] == 'bid ':
+                        if msg[4:].isdigit:
+                            mysend(self.s, M_GAME + my_msg)
+                            self.speak = False
+                        else:
+                            self.out_msg += 'Invalid bid, plesase input "bid number"'
+                    elif my_msg == 'fold':
+                        mysend(self.s, M_GAME + my_msg)
+                        self.speak = False
+                    else:
+                        self.out_msg += 'Invalid reply. Try again.'
+                    if self.speak == False:
+                        self.out_msg = 'Operate successfully. Waiting for your rival'
                 
+                elif 'Call? Raise? Fold?' in self.lastrecv:
+                    if my_msg == 'call':
+                        mysend(self.s, M_GAME + my_msg)
+                        self.speak = False
+                    elif my_msg[0:6] == 'raise':
+                        if msg[6:].isdigit:
+                            mysend(self.s, M_GAME + my_msg)
+                            self.speak = False
+                        else:
+                            self.out_msg += 'Invalid raise, plesase input "raise number"'
+                    elif my_msg == 'fold':
+                        mysend(self.s, M_GAME + my_msg)
+                        self.speak = False
+                    else:
+                        self.out_msg += 'Invalid reply. Try again.'
+                    if self.speak == False:
+                        self.out_msg = 'Operate successfully. Waiting for your rival'
+                elif self.lastrecv == 'Press any key to continue':
+                    mysend(self.s, M_GAME + my_msg)
+                    self.speak = False
+                    self.out_msg = 'Operate successfully.'
+                
+                
+            if len(peer_msg) > 0:
+                if peer_msg[-1] != '#':
+                    self.speak = False
+                    self.out_msg += peer_msg
+                else:
+                    self.speak = True
+                    peer_msg = peer_msg[: -1]
+                    self.lastrecv = peer_msg
+                    self.out_msg += peer_msg
+            
+            if peer_code == M_QUITGAME:
+                self.out_msg += 'You quitted from game.'
+                self.state = S_LOGGEDIN
+
+            # Display the menu again
+            if self.state == S_LOGGEDIN:
+                self.out_msg += menu
 #==============================================================================
 # invalid state                       
 #==============================================================================
