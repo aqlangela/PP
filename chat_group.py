@@ -114,7 +114,7 @@ class Group:
         
     def game_connect(self, me, peer):
         #if peer is in a group, join it
-        print(peer, "is already to connect!")
+        print(peer, "is ready to connect!")
         self.game_grp_ever += 1
         group_key = self.game_grp_ever
         self.game_grps[group_key] = []
@@ -162,16 +162,3 @@ class Group:
                         my_list.append(member)
         return my_list
 
-'''def main():
-    g = Group()
-    g.join('a')
-    g.join('b')
-    g.join('c')
-    g.join('d')
-    print(g.list_all())
-    g.connect('a', 'b')
-    g.game_connect('c', 'd')
-    print(g.list_all())
-    print(g.list_me('b'))
-    
-main()'''

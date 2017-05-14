@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import pickle
 import random
 import playerinfo as info
 
@@ -10,7 +11,6 @@ class Game:
         self.player1 = info.Info(player1)
         self.player2 = info.Info(player2)
         self.stack = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
-        '''self.record = {self.player1:[], self.player2:[]}'''
     
     def stackupdate(self):
         self.stack = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
@@ -84,4 +84,7 @@ class Game:
         msg += '*Player 2* Chip Owned: ' + str(self.player2.get_chip())
         msg += ' Chip on the table: ' + str(self.player2.get_bid())
         return msg
-
+        
+if __name__ == "__main__":
+    game = Game('a', 'b')
+    print(str(game.player1))

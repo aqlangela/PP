@@ -1,15 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#start
-#stack
-#draw
-#chip
-#call
-#raise
-#fold
-#calculate
-
 class Info:
     
     def __init__(self, player):

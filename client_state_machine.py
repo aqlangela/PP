@@ -66,7 +66,6 @@ class ClientSM:
             self.out_msg += 'User is not online, try again later\n'
         return(False)
     
-    #???
     def quitgame(self):
         msg = M_QUITGAME
         mysend(self.s, msg)
@@ -120,7 +119,7 @@ class ClientSM:
                     peer = peer.strip()
                     if self.game_with(peer) == True:
                         self.state = S_GAMING
-                        self.out_msg += 'Ger ready to play with ' + peer + '!\n\n'
+                        self.out_msg += 'Get ready to play with ' + peer + '!\n\n'
                         self.out_msg += '-----------------------------------\n'
                         self.out_msg += 'Are you ready?(y/n/rec/...)\n'
                         self.out_msg += 'y: Simply start without equipment\n'
@@ -129,7 +128,7 @@ class ClientSM:
                         self.lastrecv = 'Are you ready?'
                     else:
                         self.out_msg += 'Connection unsuccessful\n'
-                        
+ 
                 elif my_msg[0] == '?':
                     term = my_msg[1:].strip()
                     mysend(self.s, M_SEARCH + term)
@@ -163,7 +162,7 @@ class ClientSM:
                 elif peer_code == M_GCONNECT:
                     self.peer = peer_msg
                     self.out_msg += '[Game System]' + 'Request from ' + self.peer + '\n'
-                    self.out_msg += 'You are connected with ' + self.peer 
+                    self.out_msg += 'You are connected with ' + self.peer + '\n'
                     self.out_msg += 'Are you ready?(y/n/rec/...)\n'
                     self.out_msg += 'y: Simply start without equipment\n'
                     self.out_msg += 'n: I do not wanna play any more\n'

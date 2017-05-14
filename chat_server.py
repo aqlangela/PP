@@ -38,7 +38,7 @@ class Server:
         self.cheat = {1:0, 2:0}
         self.banker = None
         self.round = 1
-        
+
     def get_round(self):
         return str(self.round)
         
@@ -204,7 +204,7 @@ class Server:
                     to_sock = self.logged_name2sock[g]
                     mysend(to_sock, M_DISCONNECT)
 #==============================================================================
-# Gaming: Indian Cards; implement
+# Gaming: Indian Cards
 #==============================================================================
             elif code == M_GAME:
                 reply = msg[1:]
@@ -327,7 +327,6 @@ class Server:
                     mysend(sock[2], M_GAME + 'You(Player2) ' + self.game.player2.get_result() + ' this turn.')
                     self.game.calculate()
                     self.round += 1
-                    
                     for i in [1,2]:
                         mysend(sock[i], M_GAME + self.game.show())
                     if self.game.player1.get_chip() <= 0:
@@ -337,6 +336,7 @@ class Server:
                         self.ready = {}
                         self.record = {1:0, 2:0}
                         self.cheat = {1:0, 2:0}
+                        self.round = 1
                         (self.lastsend1, self.lastsend2) = ('ok', 'ok')
                     elif self.game.player2.get_chip() <= 0:
                         mysend(sock[1], M_GAME + 'You(Player1) win the game! Play again?(y/n/rec/...)#')
@@ -345,6 +345,7 @@ class Server:
                         self.ready = {}
                         self.record = {1:0, 2:0}
                         self.cheat = {1:0, 2:0}
+                        self.round = 1
                         (self.lastsend1, self.lastsend2) = ('ok', 'ok')
                     else:
                         bankersock = self.logged_name2sock[self.banker]
@@ -395,7 +396,7 @@ class Server:
                #new client request
                sock, address=self.server.accept()
                self.new_client(sock)
-           
+          
 def main():
     server=Server()
     server.run()
