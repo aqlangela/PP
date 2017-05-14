@@ -30,13 +30,17 @@ class Server:
         # game
         self.player1 = ""
         self.player2 = ""
-        self.game = gm.Game(self.player1, self.player2)
+        self.game = None
         self.lastsend1 = ''
         self.lastsend2 = ''
         self.ready = {}
         self.record = {1:0, 2:0}
         self.cheat = {1:0, 2:0}
         self.banker = None
+        self.round = 1
+        
+    def get_round(self):
+        return str(self.round)
         
     def new_client(self, sock):
         #add to all sockets and to new clients
@@ -136,6 +140,8 @@ class Server:
                     mysend(to_sock, M_GCONNECT + from_name)
                 elif self.group.is_chatting(to_name):
                     msg = M_GCONNECT + 'chatting'
+                elif self.group.is_gaming(to_name):
+                    msg = M_GCONNECT + 'gaming'
                 else:
                     msg = M_GCONNECT + 'no_user'
                 mysend(from_sock, msg)   
@@ -226,108 +232,124 @@ class Server:
                         mysend(sock[1], M_GAME + 'Your rival is ready!#')
                     if self.ready == {1:1, 2:1}:
                         #start game
-                        mysend(sock1, M_GAME + 'Game Started!')
-                        mysend(sock2, M_GAME + 'Game Started!')
+                        mysend(sock[1], M_GAME + 'Game Started!')
+                        mysend(sock[2], M_GAME + 'Game Started!')
                         self.lastsend1, self.lastsend2 = 'start', 'start'
                         self.banker = self.player1
+                        
                 if (self.lastsend1, self.lastsend2) == ('start', 'start'):
+                    for i in [1,2]:
+                        mysend(sock[i], M_GAME + '\n\nRound ' +self.get_round())
+                        if self.record[i]:
+                            mysend(sock[i], M_GAME + self.game.record())
                     self.game.deal()
                     mysend(sock[1], M_GAME + self.game.showcard(2))
                     mysend(sock[2], M_GAME + self.game.showcard(1))
                     for i in [1,2]:
-                        if self.record[i]:
-                            mysend(sock[i], M_GAME + self.game.record())
                         if self.cheat[i]:
                             mysend(sock[i], M_GAME + self.game.reveal(i))
-                    mysend(sock[1], M_GAME + str(self.game.player1.get_chip))
-                    mysend(sock[2], M_GAME + str(self.game.player2.get_chip))
+                    mysend(sock[1], M_GAME + 'Chips you have: ' + str(self.game.player1.get_chip()))
+                    mysend(sock[2], M_GAME + 'Chips you have: ' + str(self.game.player2.get_chip()))
+                    self.game.player1.initbid()
+                    self.game.player2.initbid()
                     for i in [1,2]:
                         mysend(sock[i], M_GAME + self.game.initbid())
                     if self.banker == self.player1:
                         mysend(sock[1], M_GAME + 'Bid or Fold?#')
                         mysend(sock[2], M_GAME + 'Waiting for banker...')
-                        (self.lastsend1, self.lastsend2) == ('ask', 'wait')
+                        (self.lastsend1, self.lastsend2) = ('ask', 'wait')
                     else:
                         mysend(sock[2], M_GAME + 'Bid or Fold?#')
                         mysend(sock[1], M_GAME + 'Waiting for banker...')
-                        (self.lastsend1, self.lastsend2) == ('wait', 'ask')
-                if (self.lastsend1, self.lastsend2) == ('ask', 'wait'):
+                        (self.lastsend1, self.lastsend2) = ('wait', 'ask')
+                        
+                elif (self.lastsend1, self.lastsend2) == ('ask', 'wait'):
                     if reply == 'fold':
                         self.game.player1.fold()
                         mysend(sock[2], M_GAME + 'Your rival folded.')
-                        (self.lastsend1, self.lastsend2) == ('result', 'result')
+                        (self.lastsend1, self.lastsend2) = ('result', 'result')
                     elif reply[0:4] == 'bid ':
                         reply = int(reply.strip().split()[1])
                         self.game.player1.biding(reply)
                         self.game.player2.rbid = self.game.player1.get_bid()
                         msg = 'Your rival bided ' + str(reply) + ' chips. Call? Raise? Fold?#'
                         mysend(sock[2], M_GAME + msg)
-                        (self.lastsend1, self.lastsend2) == ('wait', 'ask')
+                        (self.lastsend1, self.lastsend2) = ('wait', 'ask')
                     elif reply == 'call':
                         self.game.call(1)
                         self.game.compare()
                         mysend(sock[2], M_GAME + 'Your rival called.')
-                        (self.lastsend1, self.lastsend2) == ('result', 'result')
+                        (self.lastsend1, self.lastsend2) = ('result', 'result')
                     elif reply[0:6] == 'raise ':
                         reply = int(reply.strip().split()[1])
                         self.game.player1.raisebet(reply)
                         self.game.player2.rbid = self.game.player1.get_bid()
                         msg = 'Your rival raised ' + str(reply) + ' chips. Call? Raise? Fold?#'
                         mysend(sock[2], M_GAME + msg)
-                        (self.lastsend1, self.lastsend2) == ('wait', 'ask')
+                        (self.lastsend1, self.lastsend2) = ('wait', 'ask')
+                        
                 elif (self.lastsend1, self.lastsend2) == ('wait', 'ask'):
                     if reply == 'fold':
                         self.game.player2.fold()
                         mysend(sock[1], M_GAME + 'Your rival folded.')
-                        (self.lastsend1, self.lastsend2) == ('result', 'result')
+                        (self.lastsend1, self.lastsend2) = ('result', 'result')
                     elif reply[0:4] == 'bid ':
                         reply = int(reply.strip().split()[1])
                         self.game.player2.biding(reply)
-                        self.game.player1.rbid = self.game.player1.get_bid()
+                        self.game.player1.rbid = self.game.player2.get_bid()
                         msg = 'Your rival bided ' + str(reply) + ' chips. Call? Raise? Fold?#'
                         mysend(sock[1], M_GAME + msg)
-                        (self.lastsend1, self.lastsend2) == ('wait', 'ask')
+                        (self.lastsend1, self.lastsend2) = ('ask', 'wait')
                     elif reply == 'call':
                         self.game.call(2)
                         self.game.compare()
                         mysend(sock[1], M_GAME + 'Your rival called.')
-                        (self.lastsend1, self.lastsend2) == ('result', 'result')
+                        (self.lastsend1, self.lastsend2) = ('result', 'result')
                     elif reply[0:6] == 'raise ':
                         reply = int(reply.strip().split()[1])
                         self.game.player2.raisebet(reply)
-                        self.game.player1.rbid = self.game.player1.get_bid()
+                        self.game.player1.rbid = self.game.player2.get_bid()
                         msg = 'Your rival raised ' + str(reply) + ' chips. Call? Raise? Fold?#'
                         mysend(sock[1], M_GAME + msg)
-                        (self.lastsend1, self.lastsend2) == ('ask', 'wait')
+                        (self.lastsend1, self.lastsend2) = ('ask', 'wait')
+                        
                 if (self.lastsend1, self.lastsend2) == ('result', 'result'):
                     for i in [1,2]:
                         mysend(sock[i], M_GAME + 'Result:')
                         mysend(sock[i], M_GAME + self.game.reveal(i))
-                    mysend(sock[1], M_GAME + 'You(Player1) ' + self.game.player1.get_result())
-                    mysend(sock[2], M_GAME + 'You(Player2) ' + self.game.player2.get_result())
-                    self.game.calculate()
-                    for i in [1,2]:
-                        mysend(sock[i], M_GAME + self.game.show())
                     if self.game.player1.get_result() == 'Lose':
                         self.banker = self.player2
                     elif self.game.player2.get_result() == 'Lose':
                         self.banker = self.player1
                     else:
-                        pass
+                        pass                        
+                    mysend(sock[1], M_GAME + 'You(Player1) ' + self.game.player1.get_result() + ' this turn.')
+                    mysend(sock[2], M_GAME + 'You(Player2) ' + self.game.player2.get_result() + ' this turn.')
+                    self.game.calculate()
+                    self.round += 1
+                    
+                    for i in [1,2]:
+                        mysend(sock[i], M_GAME + self.game.show())
                     if self.game.player1.get_chip() <= 0:
                         mysend(sock[1], M_GAME + 'You(Player1) lose the game! Play again?(y/n/rec/...)#')
                         mysend(sock[2], M_GAME + 'You(Player2) win the game! Play again?(y/n/rec/...)#')
                         self.game = gm.Game(self.player1, self.player2)
+                        self.ready = {}
+                        self.record = {1:0, 2:0}
+                        self.cheat = {1:0, 2:0}
                         (self.lastsend1, self.lastsend2) = ('ok', 'ok')
                     elif self.game.player2.get_chip() <= 0:
-                        mysend(sock[1], M_GAME + 'You(Player1) win the game! PLay again?(y/n/rec/...)#')
-                        mysend(sock[2], M_GAME + 'You(Player2) lose the game! PLay again?(y/n/rec/...)#')
+                        mysend(sock[1], M_GAME + 'You(Player1) win the game! Play again?(y/n/rec/...)#')
+                        mysend(sock[2], M_GAME + 'You(Player2) lose the game! Play again?(y/n/rec/...)#')
                         self.game = gm.Game(self.player1, self.player2)
+                        self.ready = {}
+                        self.record = {1:0, 2:0}
+                        self.cheat = {1:0, 2:0}
                         (self.lastsend1, self.lastsend2) = ('ok', 'ok')
                     else:
                         bankersock = self.logged_name2sock[self.banker]
-                        myseld(bankersock, M_GAME + 'Press any key to continue#')
-                        (self.lastsend1, self.lastsend2) == ('start', 'start')
+                        mysend(bankersock, M_GAME + 'Press any key to continue#')
+                        (self.lastsend1, self.lastsend2) = ('start', 'start')
 #==============================================================================
 #QUITGAME
 #==============================================================================

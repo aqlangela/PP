@@ -10,8 +10,7 @@ class Game:
         self.player1 = info.Info(player1)
         self.player2 = info.Info(player2)
         self.stack = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
-        '''self.record = {self.player1:[(0, 0, 0) for i in range(10)], \
-                                     self.player2:[(0, 0, 0) for i in range(10)]}'''
+        '''self.record = {self.player1:[], self.player2:[]}'''
     
     def stackupdate(self):
         self.stack = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
@@ -54,12 +53,14 @@ class Game:
     def compare(self):
         if self.player1.card > self.player2.card:
             self.player2.result = 'Lose'
+            self.player1.result = 'Win'
         elif self.player1.card < self.player2.card:
             self.player1.result = 'Lose'
+            self.player2.result = 'Win'
         else:
             self.player1.result = 'Draw'
             self.player2.result = 'Draw'
-    #是直接在server还是在这里？
+            
     def calculate(self):
         if self.player1.result == 'Lose':
             self.player1.chip -= self.player1.bid
@@ -73,25 +74,14 @@ class Game:
             self.player2.bid = 0
         self.player1.card = 0
         self.player2.card = 0
+        self.player1.result = 'Win'
+        self.player2.result = 'Win'
         
     def show(self):
         msg = ''
-        msg += 'Player 1: Chip Owned: ' + str(self.player1.get_chip())
-        msg += ' Chip on the table: ' + str(self.player1.get_bid() + '\n')
-        msg += 'Player 2: Chip Owned: ' + str(self.player2.get_chip())
-        msg += ' Chip on the table: ' + str(self.player2.get_bid() + '\n')
+        msg += '\n*Player 1* Chip Owned: ' + str(self.player1.get_chip())
+        msg += ' Chip on the table: ' + str(self.player1.get_bid()) + '\n'
+        msg += '*Player 2* Chip Owned: ' + str(self.player2.get_chip())
+        msg += ' Chip on the table: ' + str(self.player2.get_bid())
         return msg
-        
-'''if __name__ == "__main__":
-    game = Game("a", "b")
-    game.deal()
-    print(game.showcard(2))
-    print(game.record())
-    print(game.player1.card)
-    print(game.player2.card)
-    game.player1.biding(1)
-    game.call(1)
-    game.compare()
-    game.calculate()
-    print(game.player1.get_chip())
-    print(game.player2.chip)'''
+
